@@ -953,8 +953,18 @@ def get_mtech_semesters(request):
 
 def add_curr_course(request):
     print(request.POST)
+    values_length = len(request.POST.getlist('course'))
+
+    for x in range(values_length):
+                for key, values in request.POST.lists():
+                    if (key == 'branch'):
+                        print("branch")
+                        print(values[x])
+                    elif (key == 'course_id'):
+                        print(values[x])
+
+    #here i have demonstrated getting the list.
     return HttpResponse("ksjhvuw9r")
-    # print(course[0])
 
 
 

@@ -23,6 +23,6 @@ urlpatterns = [
     url(r'^set_mtech_semester/', views.set_mtech_semester),
     url(r'^get_batch_semesters/', views.get_batch_semesters),
     url(r'^get_mtech_semesters/', views.get_mtech_semesters),
-
+    url(r'^add_curr_course/', views.add_curr_course),
 
 ]
