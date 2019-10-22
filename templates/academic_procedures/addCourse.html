@@ -99,17 +99,17 @@ $(function() {
                 count =count+1;
                 test =test+1;
             }
-        } 
+        }
 
         if (count >= 3){
             alert("You Can't add more than 2 courses in one semester");
-            window.location = "/academic-procedures/main/" ;  
+            window.location = "/academic-procedures/main/" ;
         }else if(credits >= 27 ){
             alert("You Can not earn more than 26 credits in one semester");
-            window.location = "/academic-procedures/main/" ;           
+            window.location = "/academic-procedures/main/" ;
         }else if(test ==0 ){
             alert("please Select a course");
-            window.location = "/academic-procedures/main/" ;           
+            window.location = "/academic-procedures/main/" ;
         }else{
         event.preventDefault();
         var friendForm = $(this);
@@ -120,7 +120,7 @@ $(function() {
             window.location = "/academic-procedures/main/";
         });
         posting.fail(function(data) {
-            alert('Filed to add course, some error occured');
+            alert('Failed to add course, some error occured');
             window.location = "/academic-procedures/main/";
         });
         }

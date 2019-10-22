@@ -89,7 +89,8 @@
         <div class="column">
         {% for o in sem_list %}
         {% if o %}
-        <form class="ui large add_curr_course_res form" id="add_curr_course_res_form{{forloop.counter}}" hidden="true">
+        <form class="ui large add_curr_course_res form" id="add_curr_course_res_form{{forloop.counter}}" action="/acad/add_curr_course/" hidden="true">
+					{% csrf_token %}
             <div class="ui  segment">
 
 
@@ -758,6 +759,43 @@
       	$('#add_curr_course_res_warning'+i).show();
       	$('.add_curr_course_res_data').text("Semester "+i+", "+$('#add_curr_course_res_hidden').text());
       });
+			$("#add_curr_course_res_set1").click(function(event) {
+				alert("Clicked Successfully");
+
+	        event.preventDefault();
+	        var friendForm = $(this);
+
+	        var posting = $.post( friendForm.attr('action'), friendForm.serialize() );
+	        posting.done(function(data) {
+	            alert('Courses Added Successfully');
+	            // window.location = "/academic-procedures/main/";
+	        });
+	        posting.fail(function(data) {
+	            alert('Failed to add Courses');
+	            // window.location = "/academic-procedures/main/";
+	        });
+	    });
     });
 
   </script>
+
+
+	<script type="text/javascript">
+	$(function() {
+	    $("#add_thesis_form").submit(function(event) {
+
+	        event.preventDefault();
+	        var friendForm = $(this);
+
+	        var posting = $.post( friendForm.attr('action'),friendForm.serialize());
+	        posting.done(function(data) {
+	            alert('Thesis Topic Successfully Submitted');
+	            window.location = "/academic-procedures/main/";
+	        });
+	        posting.fail(function(data) {
+	            alert('Failed to add');
+	            window.location = "/academic-procedures/main/";
+	        });
+	    });
+	});
+	</script>

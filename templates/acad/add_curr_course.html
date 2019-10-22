@@ -24,7 +24,7 @@
 
 <div style="color: red" id="add_curr_course_warning_programme" hidden="true">*Work for curriculum addition for masters and pg is in working stage, Please try again later.</div> <br>
 
-	
+
     <div class="add_curr_course_b" style="text-align: center;">
         <button class="ui primary button" id="add_curr_course_search">Search for curriculum</button>
     </div>
@@ -59,6 +59,25 @@ $(document).ready(function(){
         $.ajax({
                 type:"POST",
                 url: "/acad/get_batch_semesters/",
+                data:{
+                programme:programme,
+                batch : batch,
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+              success: function( data )
+                {
+                    if(data.done){
+                        $('#add_curr_course_data').html(data.html);
+                    }
+                    $("#add_curr_course_loading-img").fadeOut(1000);
+                    $('.add_curr_course_b').fadeOut(1000);
+                }
+            });
+        }
+        else if(programme=="MTECH"){
+        $.ajax({
+                type:"POST",
+                url: "/acad/get_mtech_semesters/",
                 data:{
                 programme:programme,
                 batch : batch,

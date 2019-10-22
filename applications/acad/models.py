@@ -29,6 +29,8 @@ class Constants:
         ('Elective', 'Professional Elective'),
         ('Lab', 'Professional Lab'),
         ('Project','Professional Project'),
+        ('Thesis','Thesis'),
+        ('Seminar','Seminar'),
         ('ES', 'Engineering Science'),
         ('NS', 'Natural Science'),
         ('HS', 'Humanities'),
@@ -172,7 +174,7 @@ class MtechSemester(models.Model):
 class MtechCurriculum(models.Model):
     batch = models.IntegerField(default=int(timezone.now().year))
     programme = models.CharField(max_length=30,choices=Constants.PROGRAMME,default="")
-    total_number_of_courses = models.IntegerField(default=0)
+    # total_number_of_courses = models.IntegerField(default=0)
 
     # Not Sure
     branch = models.CharField(max_length=25,choices=Constants.BRANCH,null=True,blank=True)

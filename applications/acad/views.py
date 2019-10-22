@@ -3,7 +3,7 @@ from django.shortcuts import render,redirect
 from django.urls import reverse_lazy
 from django.http import Http404,HttpResponse,HttpResponseRedirect
 from django.views.generic import TemplateView
-from .models import BatchSemester,Course,CurriculumCourse,CurriculumInstructor,BtechCurriculum,Constants
+from .models import BatchSemester,Course,CurriculumCourse,CurriculumInstructor,BtechCurriculum,Constants,MtechCurriculum,MtechSemester
 from django.template.loader import render_to_string
 from django.http import JsonResponse
 
@@ -18,27 +18,59 @@ from django.http import JsonResponse
 def homepage(request):
     return render(request,'home.html')
 
+def get_course_list(request):
+    obj = Course.objects.all()
+    print(obj)
+    context ={'course_list':obj}
+    return context
+
 def add_course(request):
     course_name = request.POST.get('course_name')
     course_detail = request.POST.get('course_detail')
     print(course_name,course_detail)
     courses = Course.objects.create(course_name=course_name,course_details=course_detail)
-    obj = Course.objects.all()
+    obj = get_course_list(request)
+    print(obj)
+
+    # if obj :
+    #     data = render_to_string('acad/add_semester_response.html',
+    #                             {'obj':obj,
+    #                             'programme' : programme,
+    #                             'batch' : batch,
+    #                             'sem' :8
+    #                             }, request)
+    #     obj = json.dumps({'html' : data, 'msg' : 'obj found', 'done' : True})
+    #     return HttpResponse(obj, content_type = 'application/json')
+    # else :
+    #     return JsonResponse({"success": True, "msg": "No Course available.",'done' : False })
+    #
+
+
     try:
-        data = render_to_string('view_course.html',{'course_list':obj},
+        print("one")
+        data = render_to_string('acad/view_course.html',{'course_list':obj},
                                  request)
         print("abcd")
-        obj = json.dumps({'d' : data})
-        # print("gscdgascdbscabdfcasbfcdnabcfb")
+        obj = json.dumps({'d':data})
+        print("gscdgascdbscabdfcasbfcdnabcfb")
         return HttpResponse(obj, content_type = 'application/json')
     except:
         return HttpResponse("fghjk")
 
-def get_course_list(request):
-    obj = Course.objects.all().filter()
-    print(obj)
-    context ={'course_list':obj}
-    return context
+
+
+def view_courses(request):
+    obj = Course.objects.all()
+    if obj :
+        data = render_to_string('acad/view_course.html',
+                                {'obj':obj
+                                }, request)
+        obj = json.dumps({'html' : data, 'msg' : 'obj found', 'done' : True})
+        return HttpResponse(obj, content_type = 'application/json')
+    else :
+        return JsonResponse({"success": True, "msg": "No Course available.",'done' : False })
+
+
 
 # def get_courses(request):
 #     return render(request,'acad/view_course.html',get_course_list(request))
@@ -462,12 +494,16 @@ def main(request):
 def acad_admin(request):
 
     pragramme_list = dict(Constants.PROGRAMME)
+    branch_list = dict(Constants.BRANCH)
+    specialization_list = dict(Constants.MTechSpecialization)
 
     return render(
                     request,
                      'acad/acad.html' ,
                      {
                         'pragramme_list' : pragramme_list,
+                        'branch_list':branch_list,
+                        'specialization_list':specialization_list,
                      })
 
 
@@ -475,47 +511,87 @@ def add_curriculum(request):
     programme  = request.POST.get('programme')
     batch = request.POST.get('batch')
 
-    curr_obj = BtechCurriculum.objects.filter(batch = int(batch), programme = programme).first()
-    if curr_obj :
-        # return JsonResponse({"success": True, "msg": "This is an alternamtive message"})
-        return JsonResponse({"success": True, "msg": "Curriculum has already been made."})
-    else :
-        programme_ = request.POST.get('programme')
-        batch =request.POST.get('batch')
-        professional_core_credit =request.POST.get('prof_core_credit')
-        professional_elective_credit = request.POST.get('prof_elective_credit')
-        professional_project_credit = request.POST.get('prof_project_credit')
-        professional_lab_credit = request.POST.get('prof_lab_credit')
-        Core_engineering_science_credit = request.POST.get('core_engineering_science_credit')
-        Core_natural_science_credit = request.POST.get('core_natural_science_credit')
-        Core_humanities_credit = request.POST.get('core_humanities_credit')
-        Core_design_credit = request.POST.get('core_design_credit')
-        Core_manufacturing_credit = request.POST.get('core_manufacturing_credit')
-        Core_management_science_credit = request.POST.get('core_management_science_credit')
-        pbi = request.POST.get('pbi')
-        pr =request.POST.get('pr')
 
-        # print(programme_,batch,pbi,pr)
-        try:
-            obj = BtechCurriculum(
-                programme=programme_,
-                batch=batch,
-                professional_core_credit=professional_core_credit,
-                professional_elective_credit=professional_elective_credit,
-                professional_project_credit=professional_project_credit,
-                professional_lab_credit=professional_lab_credit,
-                Core_engineering_science_credit=Core_engineering_science_credit,
-                Core_natural_science_credit=Core_natural_science_credit,
-                Core_humanities_credit=Core_humanities_credit,
-                Core_design_credit=Core_design_credit,
-                Core_manufacturing_credit=Core_manufacturing_credit,
-                Core_management_science_credit=Core_management_science_credit,
-                pbi=pbi,
-                pr=pr)
-            obj.save()
-            return JsonResponse({"success": True, "msg": "Curriculum  created."})
-        except:
-            return HttpResponseRedirect('/acad')
+    if programme == "BTECH":
+        curr_obj = BtechCurriculum.objects.filter(batch = int(batch), programme = programme).first()
+        if curr_obj :
+            # return JsonResponse({"success": True, "msg": "This is an alternamtive message"})
+            return JsonResponse({"success": True, "msg": "Curriculum has already been made."})
+        else :
+            professional_core_credit =request.POST.get('prof_core_credit')
+            professional_elective_credit = request.POST.get('prof_elective_credit')
+            professional_project_credit = request.POST.get('prof_project_credit')
+            professional_lab_credit = request.POST.get('prof_lab_credit')
+            Core_engineering_science_credit = request.POST.get('core_engineering_science_credit')
+            Core_natural_science_credit = request.POST.get('core_natural_science_credit')
+            Core_humanities_credit = request.POST.get('core_humanities_credit')
+            Core_design_credit = request.POST.get('core_design_credit')
+            Core_manufacturing_credit = request.POST.get('core_manufacturing_credit')
+            Core_management_science_credit = request.POST.get('core_management_science_credit')
+            pbi = request.POST.get('pbi')
+            pr =request.POST.get('pr')
+
+            print(programme,batch,pbi,pr)
+            try:
+                obj = BtechCurriculum.objects.create(
+                    programme=programme,
+                    batch=batch,
+                    professional_core_credit=professional_core_credit,
+                    professional_elective_credit=professional_elective_credit,
+                    professional_project_credit=professional_project_credit,
+                    professional_lab_credit=professional_lab_credit,
+                    Core_engineering_science_credit=Core_engineering_science_credit,
+                    Core_natural_science_credit=Core_natural_science_credit,
+                    Core_humanities_credit=Core_humanities_credit,
+                    Core_design_credit=Core_design_credit,
+                    Core_manufacturing_credit=Core_manufacturing_credit,
+                    Core_management_science_credit=Core_management_science_credit,
+                    pbi=pbi,
+                    pr=pr)
+                obj.save()
+                return JsonResponse({"success": True, "msg": "Curriculum  created."})
+            except:
+                return HttpResponseRedirect('/acad')
+
+def add_mtech_curriculum(request):
+    programme  = request.POST.get('programme')
+    batch = request.POST.get('batch')
+
+    if programme == "MTECH":
+        # print("MT")
+        curr_obj = MtechCurriculum.objects.filter(programme = programme,batch=int(batch)).first()
+
+        if curr_obj:
+            return JsonResponse({"success": True, "msg": "Curriculum has already been made."})
+        else:
+            total_number_of_courses =request.POST.get('total_number_of_courses')
+            branch = request.POST.get('branch')
+            specialization = request.POST.get('specialization')
+            total_credits = request.POST.get('total_credits')
+            elective_credits = request.POST.get('elective_credits')
+            lab_credits = request.POST.get('lab_credits')
+            thesis_credits = request.POST.get('thesis_credits')
+            seminar_credits = request.POST.get('seminar_credits')
+            core_credits = request.POST.get('core_credits')
+            # print(programme,batch)
+            try:
+                obj1 = MtechCurriculum.objects.create(
+                    programme= programme,
+                    batch =batch,
+                    total_number_of_courses =total_number_of_courses,
+                    branch = branch,
+                    specialization = specialization,
+                    total_credits = total_credits,
+                    elective_credits = elective_credits,
+                    lab_credits = lab_credits,
+                    thesis_credits = thesis_credits,
+                    seminar_credits = seminar_credits,
+                    core_credits = core_credits)
+                obj1.save()
+                # print("Succesfully Added")
+                return JsonResponse({"success": True, "msg": "Curriculum  created."})
+            except:
+                return HttpResponseRedirect('/acad')
 
 
 def get_batch_curriculum(request):
@@ -542,18 +618,39 @@ def get_batch_curriculum(request):
         obj = json.dumps({'html' : data, 'msg' : 'obj found', 'done' : True})
         return HttpResponse(obj, content_type = 'application/json')
     else :
-        return JsonResponse({"success": True, "msg": "There is no curriculum for given batch anf programme.",'done' : False })
+        return JsonResponse({"success": True, "msg": "There is no curriculum for given batch and programme.",'done' : False })
+
+def get_mtech_curriculum(request):
+    programme = request.POST.get('programme')
+    batch = int(request.POST.get('batch'))
+    if programme == "MTECH" :
+        obj = MtechCurriculum.objects.filter(batch = int(request.POST.get('batch')), programme = programme).first()
+    else:
+        obj = None
+
+
+    if obj :
+        data = render_to_string('acad/add_semester_response.html',
+                                {'obj':obj,
+                                'programme' : programme,
+                                'batch' : batch,
+                                'sem' :4
+                                }, request)
+        obj = json.dumps({'html' : data, 'msg' : 'obj found', 'done' : True})
+        return HttpResponse(obj, content_type = 'application/json')
+    else :
+        return JsonResponse({"success": True, "msg": "There is no curriculum for given batch and programme.",'done' : False })
+
 
 
 def set_batch_semester(request):
-    print(request.POST)
     programme = request.POST.get('programme')
     batch = int(request.POST.get('batch'))
     sem = int(request.POST.get('semester'))
 
     obj = BatchSemester.objects.filter(programme = programme, batch = batch, semester = sem).first()
 
-    total_courses = request.POST.get('total_number_of_courses')
+    # total_courses = request.POST.get('total_number_of_courses')
     prof_core_courses = request.POST.get('professional_core_courses')
     prof_elective_courses = request.POST.get('professional_elective_courses')
     prof_project_courses = request.POST.get('professional_project_courses')
@@ -608,6 +705,51 @@ def set_batch_semester(request):
 
     except:
         return JsonResponse({"success": True, "msg": "Could not be created.",'done' : False })
+
+
+def set_mtech_semester(request):
+    programme = request.POST.get('programme')
+    batch = int(request.POST.get('batch'))
+    sem = int(request.POST.get('semester'))
+    total_courses = request.POST.get('total_courses')
+    core_courses = request.POST.get('core_courses')
+    elective_courses = request.POST.get('elective_courses')
+    seminar = request.POST.get('seminar')
+    lab_courses = request.POST.get('lab_courses')
+    thesis = request.POST.get('thesis')
+
+    print(batch,sem,total_courses,core_courses,seminar,lab_courses,thesis,elective_courses)
+    try:
+        batch_sem = MtechSemester.objects.create(
+            programme=programme,
+            batch=batch,
+            semester=sem,
+            total_courses=total_courses,
+            core_courses=core_courses,
+            elective_courses=elective_courses,
+            seminar=seminar,
+            lab_courses=lab_courses,
+            thesis=thesis)
+        batch_sem.save()
+        print("Semester Created")
+        obj_curr = MtechCurriculum.objects.filter(batch=batch, programme = programme).first()
+        if sem == 1 :
+            obj_curr.sem1=batch_sem
+        elif sem == 2:
+            obj_curr.sem2=batch_sem
+        elif sem == 3:
+            obj_curr.sem3=batch_sem
+        elif sem == 4:
+            obj_curr.sem4=batch_sem
+        else:
+            return JsonResponse({"success": True, "msg": "Related Curriculum does not exist.",'done' : False })
+        obj_curr.save()
+        return JsonResponse({"success": True, "msg": "Semester Updated.",'done' : True })
+
+    except:
+        return JsonResponse({"success": True, "msg": "Could not be created.",'done' : False })
+
+
 
 def get_batch_semesters(request):
     programme = request.POST.get('programme')
@@ -693,10 +835,10 @@ def get_batch_semesters(request):
         tt = trc+tre+trl+tres+trns+trhs+trds+trmn+trms
 
 
-
         #
         sem_list = [obj.sem1,obj.sem2,obj.sem3,obj.sem4,obj.sem5,obj.sem6,obj.sem7,obj.sem8]
         course_list = Course.objects.all();
+        print(course_list)
         data = render_to_string('acad/add_curr_course_response.html',
                                 {'total_rem':tt,
                                 'trc':trc,
@@ -727,3 +869,95 @@ def get_batch_semesters(request):
         return HttpResponse(obj, content_type = 'application/json')
     else :
         return JsonResponse({"success": True, "msg": "There is no curriculum for given batch and programme.",'done' : False })
+
+
+
+def get_mtech_semesters(request):
+    print("Entered")
+    programme = request.POST.get('programme')
+    batch = int(request.POST.get('batch'))
+    if programme == "MTECH" :
+        obj = MtechCurriculum.objects.filter(batch = int(request.POST.get('batch')), programme = programme).first()
+    else:
+        obj = None
+
+    if obj :
+        total_credits = obj.total_credits
+        elective_credits=obj.elective_credits
+        lab_credits=obj.lab_credits
+        thesis_credits = obj.thesis_credits
+        seminar_credits = obj.seminar_credits
+        core_credits = obj.core_credits
+        branch = obj.branch
+        specialization = obj.specialization
+
+
+        # sem_batch = MtechSemester.objects.filter(batch=int(batch)).filter(programme=programme)
+        #
+        # trc=0
+        # tre=0
+        # trl=0
+        # trp=0
+        # tres=0
+        #
+        # for sem in sem_batch:
+        #     rc = CurriculumCourse.objects.filter(course_type='Thesis').filter(semester=sem)
+        #     for i in rc:
+        #         trc = trc + int(i.course_credits)
+        #     re = CurriculumCourse.objects.filter(course_type='Seminar').filter(semester=sem)
+        #     for i in re:
+        #         tre = tre + int(i.course_credits)
+        #     rl = CurriculumCourse.objects.filter(course_type='Lab').filter(semester=sem)
+        #     for i in rl:
+        #         trl = trl + int(i.course_credits)
+        #     rp = CurriculumCourse.objects.filter(course_type='Elective').filter(semester=sem)
+        #     for i in rp:
+        #         trp = trp + int(i.course_credits)
+        #     res = CurriculumCourse.objects.filter(course_type='Core').filter(semester=sem)
+        #     for i in res:
+        #         tres = tres + int(i.course_credits)
+        #
+        #
+        # trc = thesis_credits-trc
+        # tre = seminar_credits-tre
+        # trl = lab_credits-trl
+        # trp = elective_credits-trp
+        # tres = core_credits-tres
+        # tt = trc+tre+trl+tres+trp
+
+
+        #
+        sem_list = [obj.sem1,obj.sem2,obj.sem3,obj.sem4]
+        course_list = Course.objects.all();
+        print(course_list)
+        data = render_to_string('acad/add_mtech_course.html',
+                                {
+                                'sem1' : obj.sem1,
+                                'sem2' : obj.sem2,
+                                'sem3' : obj.sem3,
+                                'sem4' : obj.sem4,
+                                'obj' : obj,
+                                'sem_list' : sem_list,
+                                'course_list' : course_list,
+                                'programme' : programme,
+                                'batch' : batch,
+                                'sem' :4
+                                }, request)
+        obj = json.dumps({'html' : data, 'msg' : 'obj found', 'done' : True})
+        return HttpResponse(obj, content_type = 'application/json')
+    else :
+        return JsonResponse({"success": True, "msg": "There is no curriculum for given batch and programme.",'done' : False })
+
+
+
+
+def add_curr_course(request):
+    print(request.POST)
+    return HttpResponse("ksjhvuw9r")
+    # print(course[0])
+
+
+
+
+
+    #

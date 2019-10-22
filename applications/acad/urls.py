@@ -16,9 +16,13 @@ urlpatterns = [
     url(r'^$', views.main),
     url(r'^admin/', views.acad_admin),
     url(r'^add_curriculum/', views.add_curriculum),
+    url(r'^add_mtech_curriculum/', views.add_mtech_curriculum),
     url(r'^get_batch_curriculum/', views.get_batch_curriculum),
+    url(r'^get_mtech_curriculum/', views.get_mtech_curriculum),
     url(r'^set_batch_semester/', views.set_batch_semester),
+    url(r'^set_mtech_semester/', views.set_mtech_semester),
     url(r'^get_batch_semesters/', views.get_batch_semesters),
+    url(r'^get_mtech_semesters/', views.get_mtech_semesters),
 
 
 ]

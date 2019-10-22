@@ -27,7 +27,7 @@
         </div></center>
       </div>
 
- 
+
     <div id="add_sem_data"></div>
 
     <div class="add_sem_b" style="text-align: center;">
@@ -105,6 +105,25 @@ $(document).ready(function(){
         $.ajax({
                 type:"POST",
                 url: "/acad/get_batch_curriculum/",
+                data:{
+                programme:programme,
+                batch : batch,
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+              success: function( data )
+                {
+                    if(data.done){
+                        $('#add_sem_data').html(data.html);
+                    }
+                    $("#loading-img").fadeOut(1000);
+                    $('.add_sem_b').show();
+                }
+            });
+        }
+      else  if(programme=="MTECH"){
+        $.ajax({
+                type:"POST",
+                url: "/acad/get_mtech_curriculum/",
                 data:{
                 programme:programme,
                 batch : batch,
